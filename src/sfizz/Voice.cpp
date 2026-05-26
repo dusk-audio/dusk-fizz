@@ -1209,7 +1209,7 @@ void Voice::Impl::fillWithData(AudioSpan<float> buffer) noexcept
             (*indices)[i] -= loop.size * blockRestarts;
             if ((*indices)[i] >= sampleEnd) {
                 fill<int>(indices->subspan(i), sampleEnd);
-                fill<float>(coeffs->subspan(i), 0x1.fffffep-1);
+                fill<float>(coeffs->subspan(i), 0.99999994f);
                 break;
             }
             i++;
@@ -1228,7 +1228,7 @@ void Voice::Impl::fillWithData(AudioSpan<float> buffer) noexcept
 
                 off(int(i), true);
                 fill<int>(indices->subspan(i), sampleEnd);
-                fill<float>(coeffs->subspan(i), 0x1.fffffep-1);
+                fill<float>(coeffs->subspan(i), 0.99999994f);
                 break;
             }
         }
