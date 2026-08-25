@@ -1188,7 +1188,9 @@ void Voice::Impl::fillWithData(AudioSpan<float> buffer) noexcept
         unsigned i = 0;
         while (i < numSamples) {
             int wrappedIndex = (*indices)[i] - loop.size * blockRestarts;
-            if (wrappedIndex > loop.end) {
+            // A single step can span the loop more than once on short loops
+            // played at a high pitch ratio; wrap until back inside the loop.
+            while (wrappedIndex > loop.end) {
                 wrappedIndex -= loop.size;
                 blockRestarts += 1;
                 loop_.restarts += 1;

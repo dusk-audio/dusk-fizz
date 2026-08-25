@@ -32,6 +32,7 @@ set(SFIZZ_TEST_SOURCES
     FilesT.cpp
     MidiStateT.cpp
     InterpolatorsT.cpp
+    LoopingT.cpp
     SmoothersT.cpp
     PolyphonyT.cpp
     RegionActivationT.cpp
