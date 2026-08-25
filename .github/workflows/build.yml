@@ -24,7 +24,5 @@ jobs:
             -D SFIZZ_DEVTOOLS=OFF
       - name: Build
         run: cmake --build build -j 4
-      # The test harness locates tests/TestFiles by walking up from the
-      # working directory, so it runs from the in-tree build directory.
       - name: Test
-        run: cd build && ./tests/sfizz_tests
+        run: ctest --test-dir build --output-on-failure -j 2

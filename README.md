@@ -39,11 +39,12 @@ cmake -S . -B build -DCMAKE_BUILD_TYPE=Release
 cmake --build build -j
 ```
 
-Tests build with `-DSFIZZ_TESTS=ON` and must run from the source tree (the
-harness locates `tests/TestFiles` relative to the working directory):
+Tests build with `-DSFIZZ_TESTS=ON` and run through ctest from an in-tree
+build directory (the harness locates `tests/TestFiles` by walking up from
+its working directory):
 
 ```sh
-cd build && ./tests/sfizz_tests
+ctest --test-dir build --output-on-failure
 ```
 
 ## License
