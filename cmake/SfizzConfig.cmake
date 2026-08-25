@@ -49,9 +49,15 @@ if(WIN32)
     add_compile_definitions(_USE_MATH_DEFINES)
 endif()
 
-# Set macOS compatibility level
-if(APPLE)
-    set(CMAKE_OSX_DEPLOYMENT_TARGET "10.9")
+# Set macOS compatibility level, unless the project embedding sfizz picked one
+if(APPLE AND NOT CMAKE_OSX_DEPLOYMENT_TARGET)
+    if(CMAKE_OSX_ARCHITECTURES MATCHES "arm64" OR
+       (NOT CMAKE_OSX_ARCHITECTURES AND CMAKE_HOST_SYSTEM_PROCESSOR STREQUAL "arm64"))
+        # arm64 macOS starts at Big Sur
+        set(CMAKE_OSX_DEPLOYMENT_TARGET "11.0")
+    else()
+        set(CMAKE_OSX_DEPLOYMENT_TARGET "10.9")
+    endif()
 endif()
 
 # If using C++17, check if aligned-new has runtime support on the platform;
