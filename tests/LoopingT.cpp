@@ -18,10 +18,10 @@ using namespace sfz;
 // loop_wrap.wav carries 0.25 on frames 0 to 4 and -1 on every frame after
 // them, so a source index leaving the loop shows up as a negative sample.
 // Frame 4 is there because the nearest interpolator reads one frame past the
-// index it is given. transpose=38 advances the source by about 9.5 frames per
+// index it is given. transpose=38 advances the source by about 9 frames per
 // output sample, so a single step spans the 4-frame loop more than twice.
 static constexpr int kLoopSize = 4;
-static constexpr float kFramesPerSample = 9.5137f;
+static constexpr float kFramesPerSample = 8.9797f;
 static constexpr int kLoopCount = 64;
 
 static std::string loopingSfz(const char* extraOpcodes)
@@ -70,8 +70,8 @@ TEST_CASE("[Looping] loop_count counts every loop a step spans")
     AudioBuffer<float> buffer { 2, 8 };
     synth.loadSfzString(fs::current_path() / "tests/TestFiles/loop_wrap.sfz", loopingSfz("loop_count=64"));
 
-    // The 64 loops are spent at about 2.4 loops per output sample, so the voice
-    // leaves the loop after roughly 27 samples; counting a single loop per
+    // The 64 loops are spent at about 2.2 loops per output sample, so the voice
+    // leaves the loop after roughly 29 samples; counting a single loop per
     // sample instead would take 64 of them.
     const int expected = static_cast<int>(kLoopCount * kLoopSize / kFramesPerSample);
     int firstNegative = -1;
