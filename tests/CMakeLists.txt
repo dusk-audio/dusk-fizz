@@ -58,6 +58,7 @@ set(SFIZZ_TEST_SOURCES
     LFOT.cpp
     MessagingT.cpp
     OversamplerT.cpp
+    RectifyT.cpp
     MemoryT.cpp
     AudioFilesT.cpp
     DataHelpers.h
