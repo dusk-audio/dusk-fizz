@@ -70,7 +70,7 @@ namespace fx {
                 float in2x[2];
                 up2x.process_sample(in2x[0], in2x[1], in);
 
-                float out2x[2];
+                float out2x[4] {};
                 out2x[0] = amount * std::fabs(in2x[0]) + (1.0f - amount) * in2x[0];
                 out2x[1] = amount * std::fabs(in2x[1]) + (1.0f - amount) * in2x[1];
 
