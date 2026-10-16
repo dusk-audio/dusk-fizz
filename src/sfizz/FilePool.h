@@ -41,6 +41,7 @@
 #include <absl/types/optional.h>
 #include <absl/strings/string_view.h>
 #include <atomic_queue/atomic_queue.h>
+#include <atomic>
 #include <chrono>
 #include <thread>
 #include <future>
@@ -345,8 +346,8 @@ private:
     uint32_t preloadSize { config::preloadSize };
 
     // Signals
-    volatile bool dispatchFlag { true };
-    volatile bool garbageFlag { true };
+    std::atomic<bool> dispatchFlag { true };
+    std::atomic<bool> garbageFlag { true };
     RTSemaphore dispatchBarrier;
     RTSemaphore semGarbageBarrier;
 
