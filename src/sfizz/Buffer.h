@@ -103,9 +103,7 @@ private:
  *
  *             Apparently on Linux this effort is mostly useless, and in the end
  *             most of the SIMD operations are coded with alignment checks and
- *             sentinels so this class could probably be much simpler. It does
- *             however wrap realloc which in some cases should be a bit more
- *             efficient than allocating a whole new block.
+ *             sentinels so this class could probably be much simpler.
  *
  * @tparam     Type       The buffer type
  * @tparam     Alignment  the required alignment in bytes (defaults to
@@ -144,8 +142,7 @@ public:
     }
 
     /**
-     * @brief Resizes the buffer. Given that std::realloc may return either the same pointer
-     * or a new one, you need to account for both cases in the code if you are using deep pointers.
+     * @brief Resizes the buffer, invalidating pointers to the previous allocation.
      *
      * @param newSize the new buffer size in bytes
      * @return true if allocation succeeded
@@ -175,7 +172,7 @@ public:
 
         largerSize = tempSize;
         alignedSize = newSize;
-        paddedData.release(); // realloc has invalidated the old pointer
+        paddedData.release();
         paddedData.reset(static_cast<pointer>(newData));
         normalData = static_cast<pointer>(align(Alignment, alignedSize, newData, tempSize));
         normalEnd = normalData + alignedSize;
@@ -185,15 +182,15 @@ public:
         else
             _alignedEnd = normalEnd;
 
-        std::memcpy(normalData, oldNormalData, std::min(newSize, oldSize) * sizeof(Type));
+        if (oldSize > 0)
+            std::memcpy(normalData, oldNormalData, std::min(newSize, oldSize) * sizeof(Type));
         std::free(oldData);
 
         return true;
     }
 
     /**
-     * @brief Resizes the buffer. Given that std::realloc may return either the same pointer
-     * or a new one, you need to account for both cases in the code if you are using deep pointers.
+     * @brief Resizes the buffer, invalidating pointers to the previous allocation.
      *
      * @param newSize the new buffer size in bytes
      */
@@ -235,7 +232,8 @@ public:
     Buffer(const Buffer<Type, Alignment>& other)
     {
         resize(other.size());
-        std::memcpy(this->data(), other.data(), other.size() * sizeof(value_type));
+        if (!other.empty())
+            std::memcpy(this->data(), other.data(), other.size() * sizeof(value_type));
     }
 
     /**
@@ -258,7 +256,8 @@ public:
     {
         if (this != &other) {
             resize(other.size());
-            std::memcpy(this->data(), other.data(), other.size() * sizeof(value_type));
+            if (!other.empty())
+                std::memcpy(this->data(), other.data(), other.size() * sizeof(value_type));
         }
         return *this;
     }

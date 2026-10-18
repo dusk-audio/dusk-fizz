@@ -47,6 +47,86 @@ void checkBoundaries(sfz::Buffer<Type>& buffer, int expectedSize)
     REQUIRE(std::distance(buffer.begin(), buffer.alignedEnd()) >= expectedSize);
 }
 
+TEMPLATE_TEST_CASE("[Buffer] Empty growth", "[buffer]", float, double, int, uint8_t)
+{
+    auto& counter = sfz::Buffer<TestType>::counter();
+    const auto initialBuffers = counter.getNumBuffers();
+    const auto initialBytes = counter.getTotalBytes();
+    const bool nothrow = GENERATE(false, true);
+    {
+        sfz::Buffer<TestType> buffer;
+        sfz::Buffer<TestType> moved;
+        SECTION("Default constructed") {}
+        SECTION("Cleared") { buffer.resize(5); buffer.clear(); }
+        SECTION("Resized to zero") { buffer.resize(5); buffer.resize(0); }
+        SECTION("Move constructed") {
+            buffer.resize(5);
+            sfz::Buffer<TestType> destination(std::move(buffer));
+            moved = std::move(destination);
+        }
+        SECTION("Move assigned") { buffer.resize(5); moved = std::move(buffer); }
+
+        REQUIRE(buffer.empty());
+        REQUIRE(buffer.data() == nullptr);
+        if (nothrow)
+            REQUIRE(buffer.resize(7, std::nothrow));
+        else
+            buffer.resize(7);
+        checkBoundaries(buffer, 7);
+        for (auto value : buffer)
+            REQUIRE(value == Approx(0.0));
+
+        std::fill(buffer.begin(), buffer.end(), TestType(3));
+        buffer.resize(3);
+        buffer.resize(9);
+        checkBoundaries(buffer, 9);
+        for (size_t i = 0; i < buffer.size(); ++i)
+            REQUIRE(buffer[i] == Approx(i < 3 ? 3.0 : 0.0));
+    }
+    REQUIRE(counter.getNumBuffers() == initialBuffers);
+    REQUIRE(counter.getTotalBytes() == initialBytes);
+}
+
+TEMPLATE_TEST_CASE("[Buffer] Copy empty buffers", "[buffer]", float, double, int, uint8_t)
+{
+    auto& counter = sfz::Buffer<TestType>::counter();
+    const auto initialBuffers = counter.getNumBuffers();
+    const auto initialBytes = counter.getTotalBytes();
+    {
+        sfz::Buffer<TestType> source;
+        sfz::Buffer<TestType> moved;
+        SECTION("Default constructed") {}
+        SECTION("Cleared") { source.resize(5); source.clear(); }
+        SECTION("Resized to zero") { source.resize(5); source.resize(0); }
+        SECTION("Moved from") { source.resize(5); moved = std::move(source); }
+
+        {
+            sfz::Buffer<TestType> destination(source);
+            REQUIRE(destination.empty());
+            REQUIRE(destination.data() == nullptr);
+            REQUIRE(destination.allocationSize() == 0);
+        }
+        {
+            sfz::Buffer<TestType> destination;
+            destination = source;
+            REQUIRE(destination.empty());
+            REQUIRE(destination.data() == nullptr);
+            REQUIRE(destination.allocationSize() == 0);
+        }
+        {
+            sfz::Buffer<TestType> destination(5);
+            destination = source;
+            REQUIRE(destination.empty());
+            REQUIRE(destination.data() == nullptr);
+            REQUIRE(destination.allocationSize() == 0);
+        }
+        REQUIRE(source.empty());
+        REQUIRE(source.data() == nullptr);
+    }
+    REQUIRE(counter.getNumBuffers() == initialBuffers);
+    REQUIRE(counter.getTotalBytes() == initialBytes);
+}
+
 TEST_CASE("[Buffer] 10 floats ")
 {
     const int baseSize { 10 };
