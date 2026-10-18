@@ -5,6 +5,7 @@
 // If not, contact the sfizz maintainers at https://github.com/sfztools/sfizz
 
 #include "ParserPrivate.h"
+#include "utility/NativeFilePath.h"
 
 namespace sfz {
 
@@ -125,7 +126,7 @@ void Reader::updateSourceLocationRemoving(int byte)
 //------------------------------------------------------------------------------
 
 FileReader::FileReader(const fs::path& filePath)
-    : Reader(filePath), _fileStream(filePath)
+    : Reader(filePath), _fileStream(nativeFilePath(filePath))
 {
 }
 

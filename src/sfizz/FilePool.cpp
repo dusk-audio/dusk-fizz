@@ -31,6 +31,7 @@
 #include "Config.h"
 #include "utility/SwapAndPop.h"
 #include "utility/Debug.h"
+#include "utility/NativeFilePath.h"
 #include <ThreadPool.h>
 #include <absl/types/span.h>
 #include <absl/strings/match.h>
@@ -167,7 +168,7 @@ sfz::FilePool::~FilePool()
 
 bool sfz::FilePool::checkSample(std::string& filename) const noexcept
 {
-    fs::path path { rootDirectory / filename };
+    fs::path path { nativeFilePath(rootDirectory / filename) };
     std::error_code ec;
     if (fs::exists(path, ec))
         return true;
@@ -297,7 +298,7 @@ absl::optional<sfz::FileInformation> sfz::FilePool::getFileInformation(const Fil
     if (existingInformation)
         return existingInformation;
 
-    const fs::path file { rootDirectory / fileId.filename() };
+    const fs::path file { nativeFilePath(rootDirectory / fileId.filename()) };
 
     if (!fs::exists(file))
         return {};
@@ -319,7 +320,7 @@ bool sfz::FilePool::preloadFile(const FileId& fileId, uint32_t maxOffset) noexce
         return false;
 
     fileInformation->maxOffset = maxOffset;
-    const fs::path file { rootDirectory / fileId.filename() };
+    const fs::path file { nativeFilePath(rootDirectory / fileId.filename()) };
     AudioReaderPtr reader = createAudioReader(file, fileId.isReverse());
 
     const auto frames = static_cast<uint32_t>(reader->frames());
@@ -391,7 +392,7 @@ sfz::FileDataHolder sfz::FilePool::loadFile(const FileId& fileId) noexcept
         return { &existingFile->second };
     }
 
-    const fs::path file { rootDirectory / fileId.filename() };
+    const fs::path file { nativeFilePath(rootDirectory / fileId.filename()) };
     AudioReaderPtr reader = createAudioReader(file, fileId.isReverse());
 
     const auto frames = static_cast<uint32_t>(reader->frames());
@@ -459,7 +460,7 @@ void sfz::FilePool::setPreloadSize(uint32_t preloadSize) noexcept
     // Update all the preloaded sizes
     for (auto& preloadedFile : preloadedFiles) {
         const auto maxOffset = preloadedFile.second.information.maxOffset;
-        fs::path file { rootDirectory / preloadedFile.first.filename() };
+        fs::path file { nativeFilePath(rootDirectory / preloadedFile.first.filename()) };
         AudioReaderPtr reader = createAudioReader(file, preloadedFile.first.isReverse());
         preloadedFile.second.preloadedData = readFromFile(*reader, preloadSize + maxOffset);
     }
@@ -475,7 +476,7 @@ void sfz::FilePool::loadingJob(const QueuedFileData& data) noexcept
         return;
     }
 
-    const fs::path file { rootDirectory / id->filename() };
+    const fs::path file { nativeFilePath(rootDirectory / id->filename()) };
     std::error_code readError;
     AudioReaderPtr reader = createAudioReader(file, id->isReverse(), &readError);
 
@@ -617,7 +618,7 @@ void sfz::FilePool::setRamLoading(bool loadInRam) noexcept
 
     if (loadInRam) {
         for (auto& preloadedFile : preloadedFiles) {
-            fs::path file { rootDirectory / preloadedFile.first.filename() };
+            fs::path file { nativeFilePath(rootDirectory / preloadedFile.first.filename()) };
             AudioReaderPtr reader = createAudioReader(file, preloadedFile.first.isReverse());
             preloadedFile.second.preloadedData = readFromFile(
                 *reader,
