@@ -384,7 +384,7 @@ int sfizz_get_key_label_number(sfizz_synth_t* synth, int label_index)
 
 const char * sfizz_get_key_label_text(sfizz_synth_t* synth, int label_index)
 {
-    const auto keyLabels = synth->synth.getKeyLabels();
+    const auto& keyLabels = synth->synth.getKeyLabels();
     if (label_index < 0)
         return NULL;
 
@@ -418,7 +418,7 @@ int sfizz_get_cc_label_number(sfizz_synth_t* synth, int label_index)
 
 const char * sfizz_get_cc_label_text(sfizz_synth_t* synth, int label_index)
 {
-    const auto ccLabels = synth->synth.getCCLabels();
+    const auto& ccLabels = synth->synth.getCCLabels();
     if (label_index < 0)
         return NULL;
 
